@@ -1,17 +1,37 @@
-node {
-    stage('Artifactory configuration') {
-        // Tool name from Jenkins configuration
-        rtMaven.tool = "Maven-3.3.9"
-        // Set Artifactory repositories for dependencies resolution and artifacts deployment.
-        rtMaven.deployer releaseRepo:'libs-release-local', snapshotRepo:'libs-snapshot-local', server: server
-        rtMaven.resolver releaseRepo:'libs-release', snapshotRepo:'libs-snapshot', server: server
+pipeline {
+  agent any
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+    disableConcurrentBuilds()
+  }
+
+  stages {
+    stage('mvn clean install') {
+      steps {
+//         withMaven(globalMavenSettingsConfig: 'GlobalMavenSettings.xml.20171122',
+        withMaven(maven: 'Maven 3.5.0') {
+          sh 'mvn clean install source:jar -DskipTests=true'
+        }
+      }
     }
 
-    stage('Maven build') {
-        buildInfo = rtMaven.run pom: 'maven-example/pom.xml', goals: 'clean install'
-    }
 
-    stage('Publish build info') {
-        server.publishBuildInfo buildInfo
-    }
+//     stage('mvn deploy') {
+//       steps {
+//         withMaven(globalMavenSettingsConfig: 'GlobalMavenSettings.xml.20171122',
+//                   maven: 'Maven 3.5.0') {
+//           sh 'mvn source:jar deploy -DskipTests=true'
+//         }
+//       }
+//     }
+//     stage('mvn docker:build -DpushImageTag') {
+//       steps {
+//         withMaven(globalMavenSettingsConfig: 'GlobalMavenSettings.xml.20171122',
+//                   maven: 'Maven 3.5.0') {
+//           sh 'mvn docker:build -DpushImageTag'
+//         }
+//       }
+//     }
+  }
 }
