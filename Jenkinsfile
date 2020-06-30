@@ -12,10 +12,13 @@ pipeline {
       steps {
 
         withMaven(maven: 'Maven 3.6.3') {
-//           sh 'mvn clean install source:jar -DskipTests=true'
-             sh 'mvn clean install'
+          sh 'mvn clean install source:jar -DskipTests=true'
+//              sh 'mvn clean install'
         }
 
+        withMaven(maven: 'Maven 3.6.3'){
+            sh 'mvn deploy'
+        }
       }
 
     }
